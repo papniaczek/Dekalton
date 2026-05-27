@@ -210,7 +210,7 @@ Zidentyfikowano 15 przypadków użycia pogrupowanych w pięć obszarów funkcjon
 
 #### 4.1.3 Diagram przypadków użycia
 
-![Diagram przypadków użycia Systemu Dekalton](diagrams/png/4-1-3-uc-diagram.png)
+![Diagram przypadków użycia Systemu Dekalton](diagram-przyp-uzycia/4-1-diagram.png)
 
 > _Diagram przedstawia wszystkie 15 przypadków użycia z tabeli w punkcie 4.1.2 wraz z powiązaniami z aktorami (Gość, Klient, Klub_Sportowy, Administrator, Bramka_Płatnicza, System_Pocztowy, System_Kuriera). Uwzględnione są relacje dziedziczenia ról (Gość → Klient → Klub_Sportowy), relacja «include» (UC-04 Złożenie Zamówienia → UC-05 Opłacenie Zamówienia, UC-04 → UC-03 Zarządzanie Koszykiem) oraz relacja «extend» (UC-15 Akceptacja Zwrotu rozszerza UC-10 Zgłoszenie Zwrotu)._
 
@@ -400,4 +400,8 @@ Diagram obejmuje pięć torów: **Klient**, **System Dekalton**, **Administrator
 Diagram obejmuje cztery tory: **Klient**, **System Dekalton**, **Administrator** oraz **System_Pocztowy**. Po wybraniu opcji wystawienia Recenzji przez Klienta System Dekalton sprawdza uprawnienia. Punkt decyzyjny "Status_Zamówienia = DOSTARCZONE?" odrzuca przepływ z komunikatem o braku uprawnień, jeżeli warunek nie jest spełniony. W gałęzi "tak" Klient wprowadza ocenę (1-5) i komentarz, a System Dekalton waliduje długość tekstu (10-2000 znaków) — punkt decyzyjny "Komentarz poprawny?" tworzy pętlę z powrotem do wprowadzania oceny i komentarza, jeśli treść nie spełnia wymagań. Po pozytywnej walidacji Recenzja zostaje zapisana ze statusem OCZEKUJĄCA i przekazana Administratorowi do moderacji. Punkt decyzyjny "Recenzja zatwierdzona?" rozdziela przepływ: gałąź "nie" prowadzi do statusu ODRZUCONA i e-maila z uzasadnieniem, gałąź "tak" do publikacji Recenzji na Karcie_Produktu i przeliczenia średniej oceny.
 
 ---
+
+### 4.3 Diagramy interakcji (przebiegu) z opisem tekstowym komunikatów
+
+Poniżej przedstawiono trzy wybrane diagramy interakcji (sekwencji) modelujące przebieg komunikatów pomiędzy obiektami systemu. Zastosowano podejście obiektowe, uwzględniając cykl życia obiektów (tworzenie i niszczenie) oraz bloki sterujące (iteracje i warunki).
 
