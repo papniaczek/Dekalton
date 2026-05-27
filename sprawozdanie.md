@@ -405,3 +405,71 @@ Diagram obejmuje cztery tory: **Klient**, **System Dekalton**, **Administrator**
 
 Poniżej przedstawiono trzy wybrane diagramy interakcji (sekwencji) modelujące przebieg komunikatów pomiędzy obiektami systemu. Zastosowano podejście obiektowe, uwzględniając cykl życia obiektów (tworzenie i niszczenie) oraz bloki sterujące (iteracje i warunki).
 
+#### 4.3.1 UC-04 Złożenie Zamówienia
+
+![Diagram sekwencji — UC-04 Złożenie Zamówienia](diagram-przeb/4-3-1-diagram.png)
+
+**Uczestniczące obiekty:** aktor Klient, obiekt brzegowy `:UI_Sklepu`, obiekt sterujący `:OrderService`, obiekt encji `koszyk:Koszyk`, obiekt encji `zamowienie:Zamowienie`.
+
+**Opis komunikatów:**
+
+| # | Komunikat | Nadawca → Odbiorca | Opis |
+|---|-----------|-------------------|------|
+| 1 | `rozpocznijCheckout()` | Klient → :UI_Sklepu | Klient inicjuje proces finalizacji zamówienia w interfejsie. |
+| 2 | `utworzZamowienie(klientId)` | :UI_Sklepu → :OrderService | Przekazanie żądania utworzenia zamówienia do warstwy logiki. |
+| 3 | `pobierzPozycje()` | :OrderService → koszyk:Koszyk | Pobranie zawartości z obiektu koszyka powiązanego z sesją. |
+| 4 | `pozycje` | koszyk:Koszyk → :OrderService | Zwrot listy wybranych wariantów produktów. |
+| 5 | `<<create>>` | :OrderService → zamowienie:Zamowienie | Utworzenie nowego, pustego obiektu zamówienia. |
+| 6 | `z` | zamowienie:Zamowienie → :OrderService | Zwrócenie referencji do nowo utworzonego obiektu. |
+| 7 | `dodajPozycje(pozycje[i])` | :OrderService → zamowienie:Zamowienie | [Pętla: 1..ilosc_pozycji] Cykliczne dodawanie pozycji z koszyka do obiektu zamówienia. |
+| 8 | `ustawStatus(OPŁACONE)` | :OrderService → zamowienie:Zamowienie | [Warunek: płatność online] Ustawienie statusu w przypadku opłacenia z góry. |
+| 9 | `ustawStatus(NOWE)` | :OrderService → zamowienie:Zamowienie | [Warunek: płatność przy odbiorze] Ustawienie statusu dla pobrania. |
+| 10| `<<destroy>> wyczysc()` | :OrderService → koszyk:Koszyk | Usunięcie obiektu koszyka po udanym skopiowaniu danych do zamówienia. |
+| 11| `potwierdzenie` | :OrderService → :UI_Sklepu | Zwrot informacji o sukcesie operacji. |
+| 12| `wyswietlPotwierdzenie()`| :UI_Sklepu → Klient | Prezentacja ekranu podsumowania. |
+
+---
+
+#### 4.3.2 UC-10 Zgłoszenie Zwrotu
+
+![Diagram sekwencji — UC-10 Zgłoszenie Zwrotu](diagram-przeb/4-3-2-diagram.png)
+
+**Uczestniczące obiekty:** aktor Klient, obiekt brzegowy `:UI_Sklepu`, obiekt sterujący `:ReturnService`, obiekt encji `zamowienie:Zamowienie`, obiekt encji `zwrot:Zwrot`.
+
+**Opis komunikatów:**
+
+| # | Komunikat | Nadawca → Odbiorca | Opis |
+|---|-----------|-------------------|------|
+| 1 | `zglosZwrot(idZamowienia, przyczyna)`| Klient → :UI_Sklepu | Klient wypełnia formularz zwrotu wybranego zamówienia. |
+| 2 | `weryfikujZwrot(idZamowienia)` | :UI_Sklepu → :ReturnService | Przekazanie zgłoszenia do walidacji. |
+| 3 | `sprawdzTermin(idZamowienia)` | :ReturnService → zamowienie:Zamowienie | Wywołanie na obiekcie zamówienia metody sprawdzającej, czy nie minęło 14 dni od dostawy. |
+| 4 | `bTerminWazny` | zamowienie:Zamowienie → :ReturnService | Zwrócenie flagi logicznej oznaczającej ważność terminu. |
+| 5 | `<<create>>` | :ReturnService → zwrot:Zwrot | [Opcja: bTerminWazny == true] Utworzenie nowego obiektu reprezentującego zwrot. |
+| 6 | `zwrot` | zwrot:Zwrot → :ReturnService | Zwrócenie referencji do obiektu zwrotu. |
+| 7 | `generujPDF()` | :ReturnService → zwrot:Zwrot | Zlecenie obiektowi wygenerowania własnego widoku do druku. |
+| 8 | `plikPDF` | zwrot:Zwrot → :ReturnService | Zwrócenie wygenerowanego pliku. |
+| 9 | `udostepnijPDF()` | :ReturnService → :UI_Sklepu | Przekazanie pliku do warstwy prezentacji. |
+| 10| `pobierzPDF()` | :UI_Sklepu → Klient | Udostępnienie pliku Klientowi do pobrania. |
+
+---
+
+#### 4.3.3 UC-09 Wystawienie Recenzji (Przebieg Moderacji)
+
+![Diagram sekwencji — UC-09 Moderacja Recenzji](diagram-przeb/4-3-3-diagram.png)
+
+**Uczestniczące obiekty:** aktor Administrator, obiekt brzegowy `:PanelAdmina`, obiekt sterujący `:ReviewService`, obiekt encji `recenzje:KolejkaRecenzji`, obiekt encji `r:Recenzja`.
+
+**Opis komunikatów:**
+
+| # | Komunikat | Nadawca → Odbiorca | Opis |
+|---|-----------|-------------------|------|
+| 1 | `pobierzOczekujace()` | Administrator → :PanelAdmina | Administrator żąda wyświetlenia listy recenzji do sprawdzenia. |
+| 2 | `pobierzDoModeracji()`| :PanelAdmina → :ReviewService | Panel przekazuje żądanie do kontrolera opinii. |
+| 3 | `pobierzListe()` | :ReviewService → recenzje:KolejkaRecenzji | Pobranie danych z agregatu przechowującego oczekujące recenzje. |
+| 4 | `listaRecenzji` | recenzje:KolejkaRecenzji → :ReviewService | Zwrócenie kolekcji recenzji. |
+| 5 | `wyświetlListe()` | :ReviewService → :PanelAdmina | Przekazanie danych na widok administratora. |
+| 6 | `ocenRecenzje(r, decyzja)` | Administrator → :PanelAdmina | [Pętla: dla każdej recenzji] Podjęcie decyzji (akceptuj/odrzuć) dla konkretnej recenzji. |
+| 7 | `moderuj(r, decyzja)` | :PanelAdmina → :ReviewService | Przekazanie decyzji moderatora do serwisu. |
+| 8 | `ustawStatus(ZATWIERDZONA)` | :ReviewService → r:Recenzja | [Warunek: akceptacja] Obiekt recenzji zmienia swój stan wewnętrzny i staje się publiczny. |
+| 9 | `<<destroy>> usun()` | :ReviewService → r:Recenzja | [Warunek: odrzucenie] Destrukcja (usunięcie) obiektu niespełniającego regulaminu. |
+| 10| `status` | :ReviewService → :PanelAdmina | Zwrócenie wyniku operacji po przetworzeniu każdej z recenzji. |
