@@ -210,7 +210,7 @@ Zidentyfikowano 15 przypadków użycia pogrupowanych w pięć obszarów funkcjon
 
 #### 4.1.3 Diagram przypadków użycia
 
-![Diagram przypadków użycia Systemu Dekalton](diagram-przyp-uzycia/4-1-diagram.png)
+![Diagram przypadków użycia Systemu Dekalton](diagrams/png/4-1-3-uc-diagram.png)
 
 > _Diagram przedstawia wszystkie 15 przypadków użycia z tabeli w punkcie 4.1.2 wraz z powiązaniami z aktorami (Gość, Klient, Klub_Sportowy, Administrator, Bramka_Płatnicza, System_Pocztowy, System_Kuriera). Uwzględnione są relacje dziedziczenia ról (Gość → Klient → Klub_Sportowy), relacja «include» (UC-04 Złożenie Zamówienia → UC-05 Opłacenie Zamówienia, UC-04 → UC-03 Zarządzanie Koszykiem) oraz relacja «extend» (UC-15 Akceptacja Zwrotu rozszerza UC-10 Zgłoszenie Zwrotu)._
 
@@ -374,4 +374,30 @@ Do szczegółowego opisu wybrano trzy przypadki użycia o najbardziej rozbudowan
 - *Klient (autor):* możliwość podzielenia się opinią, wpływ na decyzje innych Klientów.
 - *Inni Klienci:* lepsze decyzje zakupowe (korzyść niemierzalna).
 - *Sklep:* materiał marketingowy, dane do wskaźnika K8 (średnia ocena ≥ 4,2 / 5,0), informacja zwrotna o jakości Produktów.
+
+---
+
+### 4.2 Diagramy czynności
+
+W niniejszej sekcji przedstawiono trzy diagramy czynności (UML Activity) z podziałem na swimlanes (tory) odpowiadające aktorom uczestniczącym w przebiegu każdego z procesów. Dla każdego diagramu wybrano przypadek użycia o najbardziej rozbudowanej logice przepływu i przepływach alternatywnych.
+
+#### 4.2.1 UC-04 Złożenie Zamówienia (Checkout)
+
+![Diagram czynności — UC-04 Złożenie Zamówienia](diagram-czynn/4-2-1-diagram.png)
+
+Diagram obejmuje cztery tory: **Klient**, **System Dekalton**, **Bramka_Płatnicza** oraz **System_Pocztowy**. Przepływ rozpoczyna się od rozpoczęcia Checkoutu przez Klienta, po którym System Dekalton weryfikuje dostępność pozycji na magazynie. W diagramie występują trzy punkty decyzyjne: (1) **dostępność pozycji** — w przypadku braku przepływ kończy się powrotem do Koszyka, (2) **wybór metody płatności** — gałąź "przy odbiorze" pomija etap obsługi przez Bramkę_Płatniczą i prowadzi bezpośrednio do zmiany Statusu_Zamówienia na OPŁACONE oraz wysyłki e-maila, (3) **wynik płatności online** — gałąź "odrzucona" tworzy pętlę przez aktywność "Ponowienie płatności" z powrotem do przetwarzania transakcji, gałąź "zaakceptowana" prowadzi do zmiany Statusu_Zamówienia na OPŁACONE, wysyłki potwierdzenia przez System_Pocztowy i węzła końcowego.
+
+#### 4.2.2 UC-10 Zgłoszenie Zwrotu
+
+![Diagram czynności — UC-10 Zgłoszenie Zwrotu](diagram-czynn/4-2-2-diagram.png)
+
+Diagram obejmuje pięć torów: **Klient**, **System Dekalton**, **Administrator**, **Bramka_Płatnicza** oraz **System_Pocztowy**. Po zgłoszeniu Zwrotu przez Klienta System Dekalton weryfikuje termin 14 dni od dostawy — jeśli termin upłynął, przepływ kończy się odrzuceniem. W przeciwnym razie Klient wybiera pozycje i przyczynę Zwrotu, System Dekalton tworzy rekord oraz generuje formularz PDF, a System_Pocztowy wysyła go Klientowi. Administrator po fizycznym odebraniu paczki weryfikuje stan towaru. Punkt decyzyjny "Towar akceptowalny?" rozdziela przepływ na dwie ścieżki: gałąź "nie" prowadzi do statusu ODRZUCONY i e-maila z odmową, gałąź "tak" uruchamia **fork (rozdzielenie równoległe)** — trzy niezależne aktywności wykonywane jednocześnie: aktualizacja stanu magazynowego i Statusu_Zamówienia na ZWRÓCONE w Systemie Dekalton, zwrot środków przez Bramkę_Płatniczą oraz wysłanie e-maila o akceptacji przez System_Pocztowy. Po zakończeniu wszystkich trzech ścieżek **join (połączenie)** sprowadza przepływ do węzła końcowego.
+
+#### 4.2.3 UC-09 Wystawienie Recenzji
+
+![Diagram czynności — UC-09 Wystawienie Recenzji](diagram-czynn/4-2-3-diagram.png)
+
+Diagram obejmuje cztery tory: **Klient**, **System Dekalton**, **Administrator** oraz **System_Pocztowy**. Po wybraniu opcji wystawienia Recenzji przez Klienta System Dekalton sprawdza uprawnienia. Punkt decyzyjny "Status_Zamówienia = DOSTARCZONE?" odrzuca przepływ z komunikatem o braku uprawnień, jeżeli warunek nie jest spełniony. W gałęzi "tak" Klient wprowadza ocenę (1-5) i komentarz, a System Dekalton waliduje długość tekstu (10-2000 znaków) — punkt decyzyjny "Komentarz poprawny?" tworzy pętlę z powrotem do wprowadzania oceny i komentarza, jeśli treść nie spełnia wymagań. Po pozytywnej walidacji Recenzja zostaje zapisana ze statusem OCZEKUJĄCA i przekazana Administratorowi do moderacji. Punkt decyzyjny "Recenzja zatwierdzona?" rozdziela przepływ: gałąź "nie" prowadzi do statusu ODRZUCONA i e-maila z uzasadnieniem, gałąź "tak" do publikacji Recenzji na Karcie_Produktu i przeliczenia średniej oceny.
+
+---
 
