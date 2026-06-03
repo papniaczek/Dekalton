@@ -56,7 +56,7 @@
 Przedmiotem projektu jest zaprojektowanie i wytworzenie internetowego sklepu sportowego o nazwie **Dekalton**, na wzór sklepu Decathlon. System ma postać aplikacji webowej dostępnej dla trzech grup użytkowników:
 
 - **gości** (niezarejestrowanych klientów),
-- **zarejestrowanych klientów** (osób prywatnych oraz klubów sportowych),
+- **zarejestrowanych klientów** (osób prywatnych),
 - **administratorów** (pracowników sklepu).
 
 System Dekalton obejmuje następujące moduły funkcjonalne:
@@ -78,7 +78,7 @@ System Dekalton obejmuje następujące moduły funkcjonalne:
 
 ### 2.1 Cel systemu
 
-Celem Systemu Dekalton jest udostępnienie klientom indywidualnym oraz klubom sportowym kanału sprzedaży internetowej sprzętu sportowego, który umożliwia samodzielne wyszukanie, porównanie i zakup produktów sportowych z dostawą do domu lub do paczkomatu, a właścicielowi sklepu — prowadzenie sprzedaży 24/7 bez konieczności obsługi klienta w sklepie stacjonarnym.
+Celem Systemu Dekalton jest udostępnienie klientom indywidualnym kanału sprzedaży internetowej sprzętu sportowego, który umożliwia samodzielne wyszukanie, porównanie i zakup produktów sportowych z dostawą do domu lub do paczkomatu, a właścicielowi sklepu — prowadzenie sprzedaży 24/7 bez konieczności obsługi klienta w sklepie stacjonarnym.
 
 ### 2.2 Zakres systemu
 
@@ -97,7 +97,6 @@ Polski rynek e-commerce sprzętu sportowego rośnie corocznie i jest zdominowany
 
 - amatorzy uprawiający sport rekreacyjnie (osoby 18–55 lat);
 - rodzice kupujący sprzęt dla dzieci;
-- kluby sportowe i szkółki sportowe zamawiające sprzęt hurtowo;
 - początkujący sportowcy poszukujący kompletnego wyposażenia.
 
 **Skala eksploatacji (założenie projektowe):** rolę administracyjną pełni 2–5 pracowników; w pierwszym roku działalności przewiduje się ok. 10 000 zarejestrowanych klientów.
@@ -125,7 +124,6 @@ Każda korzyść jest opisana wartością docelową oraz sposobem wyliczenia. Ws
 - Łatwiejszy dostęp do sprzętu sportowego dla mieszkańców miejscowości bez sklepów stacjonarnych.
 - Lepsze decyzje zakupowe klientów dzięki recenzjom innych użytkowników.
 - Uproszczenie pracy administratorów dzięki zintegrowanemu panelowi zarządzania.
-- Budowa relacji z klubami sportowymi jako lojalnymi klientami hurtowymi.
 - Większa elastyczność w prowadzeniu akcji marketingowych (kupony, promocje sezonowe) bez angażowania pracowników sklepu stacjonarnego.
 
 ---
@@ -139,7 +137,6 @@ Słownik definiuje terminy specyficzne dla dziedziny projektu, używane w pozost
 | **System / System Dekalton** | aplikacja webowa będąca przedmiotem niniejszego projektu, składająca się z front-endu klienta i panelu administracyjnego. |
 | **Gość** | użytkownik korzystający z Systemu bez założonego konta (nie jest zalogowany). |
 | **Klient** | zarejestrowany użytkownik Systemu posiadający konto, mogący składać zamówienia we własnym imieniu. |
-| **Klub_Sportowy** | rodzaj konta Klienta przeznaczony dla organizacji (klubów, szkółek), uprawniający do zamówień hurtowych z rabatem oraz odroczonego terminu płatności. |
 | **Administrator** | pracownik sklepu posiadający uprawnienia do zarządzania zawartością Systemu (produkty, zamówienia, recenzje, zwroty). |
 | **Produkt** | artykuł sportowy dostępny w sprzedaży, opisany nazwą, marką, kategorią, opisem, zdjęciami i ceną bazową. |
 | **Wariant_Produktu** | konkretna odmiana Produktu różniąca się rozmiarem, kolorem, płcią lub wiekiem docelowym; każdy Wariant_Produktu posiada osobny SKU oraz własny stan magazynowy. |
@@ -177,14 +174,12 @@ W Systemie Dekalton wyróżniamy następujących aktorów:
 
 - **Gość** — niezarejestrowany użytkownik Systemu. Ma dostęp do publicznej części sklepu: przeglądania Katalogu, wyszukiwania Produktów, dodawania Produktów do Koszyka oraz złożenia Zamówienia bez rejestracji konta. Nie może wystawiać Recenzji ani prowadzić Listy_Życzeń.
 - **Klient** — zarejestrowany użytkownik Systemu posiadający konto. Dziedziczy wszystkie uprawnienia Gościa, a dodatkowo: zarządza danymi konta, prowadzi Listę_Życzeń, przegląda historię Zamówień, wystawia Recenzje (po dostawie zakupionego Produktu) oraz zgłasza Zwroty w terminie 14 dni od dostawy.
-- **Klub_Sportowy** — wyspecjalizowany typ Klienta (organizacja). Po weryfikacji przez Administratora otrzymuje dostęp do cennika hurtowego oraz do zamówień z odroczonym terminem płatności.
 - **Administrator** — pracownik sklepu zarządzający zawartością Systemu. Tworzy i edytuje Produkty, Warianty_Produktu, Kategorie, Promocje i Kupony_Rabatowe, moderuje Recenzje, obsługuje Zamówienia (zmiana Statusu_Zamówienia, dodanie numeru przesyłki) oraz akceptuje lub odrzuca zgłoszone Zwroty.
 
 **Aktorzy systemowi (zewnętrzni):**
 
 - **Bramka_Płatnicza** — zewnętrzny system obsługujący płatności online (BLIK, karta, szybki przelew). Komunikuje się z Systemem podczas Checkoutu (autoryzacja transakcji) oraz przy realizacji zwrotu środków po akceptacji Zwrotu.
 - **System_Pocztowy** — zewnętrzny system wysyłki wiadomości e-mail (potwierdzenia rejestracji, potwierdzenia Zamówień, powiadomienia o statusie wysyłki, powiadomienia o moderacji Recenzji, formularze Zwrotu).
-- **System_Kuriera** — zewnętrzny system operatora logistycznego (np. InPost, DPD), z którym System wymienia numery przesyłek i linki do śledzenia.
 
 #### 4.1.2 Lista przypadków użycia
 
@@ -204,15 +199,15 @@ Zidentyfikowano 15 przypadków użycia pogrupowanych w pięć obszarów funkcjon
 | UC-10 | Zgłoszenie Zwrotu | Klient | System_Pocztowy, Bramka_Płatnicza |
 | UC-11 | Zarządzanie Produktami i Wariantami_Produktu | Administrator | — |
 | UC-12 | Zarządzanie Promocjami i Kuponami_Rabatowymi | Administrator | — |
-| UC-13 | Obsługa Zamówień (zmiana statusu, wysyłka) | Administrator | System_Pocztowy, System_Kuriera |
+| UC-13 | Obsługa Zamówień (zmiana statusu, wysyłka) | Administrator | System_Pocztowy |
 | UC-14 | Moderacja Recenzji | Administrator | System_Pocztowy |
 | UC-15 | Akceptacja / odrzucenie Zwrotu | Administrator | Bramka_Płatnicza, System_Pocztowy |
 
-#### 4.1.3 Diagram przypadków użycia
+#### 4.1.2 Diagram przypadków użycia
 
 ![Diagram przypadków użycia Systemu Dekalton](diagram-przyp-uzycia/4-1-diagram.png)
 
-> _Diagram przedstawia wszystkie 15 przypadków użycia z tabeli w punkcie 4.1.2 wraz z powiązaniami z aktorami (Gość, Klient, Klub_Sportowy, Administrator, Bramka_Płatnicza, System_Pocztowy, System_Kuriera). Uwzględnione są relacje dziedziczenia ról (Gość → Klient → Klub_Sportowy), relacja «include» (UC-04 Złożenie Zamówienia → UC-05 Opłacenie Zamówienia, UC-04 → UC-03 Zarządzanie Koszykiem) oraz relacja «extend» (UC-15 Akceptacja Zwrotu rozszerza UC-10 Zgłoszenie Zwrotu)._
+> _Diagram przedstawia wszystkie 15 przypadków użycia z tabeli w punkcie 4.1.2 wraz z powiązaniami z aktorami (Gość, Klient, Administrator, Bramka_Płatnicza, System_Pocztowy). Uwzględnione są relacje dziedziczenia ról (Gość → Klient), relacja «include» (UC-04 Złożenie Zamówienia → UC-05 Opłacenie Zamówienia, UC-04 → UC-03 Zarządzanie Koszykiem) oraz relacja «extend» (UC-15 Akceptacja Zwrotu rozszerza UC-10 Zgłoszenie Zwrotu)._
 
 ### 4.1.2 Opisy tekstowe wybranych przypadków użycia
 
