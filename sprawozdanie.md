@@ -901,3 +901,8 @@ W celu zobrazowania cyklu życia kluczowych obiektów systemu oraz zmian ich zac
 * `Odrzucona`: Treść narusza regulamin (np. zawiera spam) i została trwale zablokowana.
 
 * Stan końcowy (Stop): Zakończenie cyklu życia (np. usunięcie opinii lub archiwizacja).
+
+### 5.4 Propozycje interfejsu użytkownika
+
+![Interfejs użytkownika z rodzieleniem na poszczególne etapy](interfejs-graficzny/graficzny-interfejs.png)
+
