@@ -499,3 +499,25 @@ Architektura systemu Dekalton opiera się na klasycznym, trójwarstwowym modelu 
 
 4. **Integracje Zewnętrzne:**
    * Pakiety adapterów umożliwiające komunikację przez API z podmiotami trzecimi: `Bramka_Platnicza_API` (autoryzacja transakcji i zwrot środków) oraz `System_Pocztowy_API` (wysyłka powiadomień).
+
+### 5.1 Diagram klas
+
+Ze względu na dużą liczbę klas dziedzinowych (ponad 15 encji), model podzielono na dwa uzupełniające się diagramy — każdy skupia się na odrębnym obszarze systemu i jest czytelny samodzielnie. Klasy zostały zaprojektowane z myślą o implementacji w środowisku obiektowym z użyciem mapowania obiektowo-relacyjnego (ORM).
+
+#### 5.1.1 Użytkownicy i Zamówienia
+
+![Diagram klas (1/2) — Użytkownicy i Zamówienia](diagram-klas/5-1-1-diagram.png)
+
+Diagram obejmuje klasy odpowiedzialne za zarządzanie użytkownikami i procesem zakupowym: abstrakcyjną klasę `Uzytkownik` z dziedziczącymi `Klient` i `Administrator`, a także `Koszyk`, `PozycjaKoszyka`, `Zamowienie`, `PozycjaZamowienia`, `AdresDostawy` oraz typ wyliczeniowy `StatusZamowienia`.
+
+#### 5.1.2 Katalog, Recenzje i Zwroty
+
+![Diagram klas (2/2) — Katalog, Recenzje i Zwroty](diagram-klas/5-1-2-diagram.png)
+
+Diagram obejmuje klasy odpowiedzialne za katalog produktów i obsługę posprzedażową: `Produkt`, `WariantProduktu`, `KategoriaSportu`, `KategoriaProduktu`, `ListaZyczen`, `Recenzja`, `Zwrot`, `PozycjaZwrotu`, `Promocja` oraz typy wyliczeniowe `StatusRecenzji` i `StatusZwrotu`.
+
+**Kluczowe aspekty projektowe widoczne na diagramach:**
+* **Dziedziczenie (Generalizacja):** Klasy `Klient` oraz `Administrator` dziedziczą po wspólnej klasie abstrakcyjnej `Uzytkownik`, współdzieląc podstawowe dane dostępowe (email, hasło).
+* **Silne powiązania (Kompozycja):** `Produkt` zarządza cyklem życia swoich obiektów `WariantProduktu` (wariant nie istnieje bez produktu). Podobnie `Zamowienie` trwale posiada swoje `PozycjaZamowienia`, `Koszyk` — `PozycjaKoszyka`, a `Zwrot` — `PozycjaZwrotu`.
+* **Słabe powiązania (Agregacja):** `ListaZyczen` agreguje referencje do obiektów klasy `Produkt` — usunięcie listy życzeń nie powoduje usunięcia produktów z bazy sklepu.
+* **Typy wyliczeniowe:** `StatusZamowienia`, `StatusRecenzji` i `StatusZwrotu` modelują cykl życia odpowiednich obiektów i stanowią jawny kontrakt między warstwami systemu.
