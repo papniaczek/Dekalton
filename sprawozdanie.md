@@ -904,5 +904,6 @@ W celu zobrazowania cyklu życia kluczowych obiektów systemu oraz zmian ich zac
 
 ### 5.4 Propozycje interfejsu użytkownika
 
-![Interfejs użytkownika z rodzieleniem na poszczególne etapy](interfejs-graficzny/graficzny-interfejs.png)
+![Interfejs użytkownika z rodzieleniem na poszczególne etapy 1/2](interfejs-graficzny/graficzny-interfejs-1.png)
+![Interfejs użytkownika z rodzieleniem na poszczególne etapy 2/2](interfejs-graficzny/graficzny-interfejs-2.png)
 
