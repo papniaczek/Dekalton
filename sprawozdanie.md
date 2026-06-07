@@ -468,3 +468,34 @@ Poniżej przedstawiono trzy wybrane diagramy interakcji (sekwencji) modelujące 
 | 8 | `ustawStatus(ZATWIERDZONA)` | :ReviewService → r:Recenzja | [Warunek: akceptacja] Obiekt recenzji zmienia swój stan wewnętrzny i staje się publiczny. |
 | 9 | `<<destroy>> usun()` | :ReviewService → r:Recenzja | [Warunek: odrzucenie] Destrukcja (usunięcie) obiektu niespełniającego regulaminu. |
 | 10| `status` | :ReviewService → :PanelAdmina | Zwrócenie wyniku operacji po przetworzeniu każdej z recenzji. |
+
+## 5. Perspektywa projektowa
+
+### 5.0 Proponowana architektura systemu
+
+Architektura systemu Dekalton opiera się na klasycznym, trójwarstwowym modelu aplikacji webowej. Główny nacisk położono na ścisłą separację obowiązków (SoC), co ułatwia testowanie, wdrażanie oraz późniejsze modyfikacje. Logika serwerowa opiera się na technologii .NET (np. ASP.NET Core), a dane składowane są w relacyjnej bazie danych (SQL). 
+
+![Diagram pakietów — Architektura systemu](diagram-pak/5-0-diagram.png)
+
+> *Diagram prezentuje logiczny podział systemu na warstwy: Prezentacji, Logiki Biznesowej oraz Dostępu do Danych, a także integracje z wymaganymi systemami zewnętrznymi (Bramka Płatnicza, System Pocztowy).*
+
+**Zidentyfikowane komponenty i pakiety (warstwy):**
+
+1. **Warstwa Prezentacji:**
+   * Odpowiada za interfejs użytkownika (UI) i interakcję z aktorem. 
+   * Podzielona na dwa główne pakiety: `SklepUI` (sklep docelowy dla Gości i Klientów, m.in. katalog, koszyk, checkout) oraz `AdminUI` (panel zarządzania zawartością dla Administratorów).
+   * Komunikuje się z backendem wyłącznie poprzez żądania sieciowe do wystawionego API.
+
+2. **Warstwa Logiki Biznesowej:**
+   * Rdzeń systemu w środowisku .NET, w którym zaimplementowano pełne procesy biznesowe. Zawiera usługi (serwisy) hermetyzujące reguły dziedzinowe. Zastosowano tu popularne wzorce projektowe.
+   * `OrderService` – nadzoruje cykl życia Zamówienia, płatności i operacje na Koszyku. Wykorzystuje wzorzec *Builder* (Budowniczy) do bezpiecznego konstruowania skomplikowanych obiektów zamówień.
+   * `ReviewService` – odpowiada za przyjmowanie, walidację i moderację Recenzji. Implementuje wzorzec *Observer* (Obserwator), automatycznie powiadamiając odpowiednie moduły (np. powiadomienia e-mail) o zmianie statusu zatwierdzenia recenzji przez administratora.
+   * `CatalogService` – zarządza Produktami, Wariantami_Produktu, stanem magazynowym oraz obsługuje zapytania wyszukiwania. Konfiguracja głównych parametrów katalogu opiera się na wzorcu *Singleton*, gwarantując jedną, wspólną instancję ustawień w pamięci.
+   * `ReturnService` – obsługuje procedurę zgłaszania i akceptacji zwrotów towarów.
+
+3. **Warstwa Dostępu do Danych:**
+   * Pakiety odpowiedzialne za bezpośrednią komunikację z relacyjną bazą danych (SQL) przy użyciu narzędzia ORM (np. Entity Framework Core). 
+   * Zawiera klasy repozytoriów, które mapują obiekty dziedzinowe systemu (np. Zamówienie, Produkt) na tabele w bazie, izolując logikę biznesową od składni języka zapytań.
+
+4. **Integracje Zewnętrzne:**
+   * Pakiety adapterów umożliwiające komunikację przez API z podmiotami trzecimi: `Bramka_Platnicza_API` (autoryzacja transakcji i zwrot środków) oraz `System_Pocztowy_API` (wysyłka powiadomień).
