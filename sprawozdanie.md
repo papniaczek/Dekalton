@@ -521,3 +521,383 @@ Diagram obejmuje klasy odpowiedzialne za katalog produktów i obsługę posprzed
 * **Silne powiązania (Kompozycja):** `Produkt` zarządza cyklem życia swoich obiektów `WariantProduktu` (wariant nie istnieje bez produktu). Podobnie `Zamowienie` trwale posiada swoje `PozycjaZamowienia`, `Koszyk` — `PozycjaKoszyka`, a `Zwrot` — `PozycjaZwrotu`.
 * **Słabe powiązania (Agregacja):** `ListaZyczen` agreguje referencje do obiektów klasy `Produkt` — usunięcie listy życzeń nie powoduje usunięcia produktów z bazy sklepu.
 * **Typy wyliczeniowe:** `StatusZamowienia`, `StatusRecenzji` i `StatusZwrotu` modelują cykl życia odpowiednich obiektów i stanowią jawny kontrakt między warstwami systemu.
+
+### 5.2 Uporządkowany alfabetycznie wykaz wszystkich klas
+
+#### 5.2.1 Użytkownicy i Zamówienia
+
+**1. Administrator (dziedziczy po: Uzytkownik)**
+
+Opis: Reprezentuje pracownika sklepu posiadającego uprawnienia do zarządzania zawartością systemu, w tym moderacji opinii i zmiany statusów zamówień.
+
+Atrybuty:
+
+* `poziomDostepu : string` – określa szczegółową rolę i zakres uprawnień w panelu administracyjnym.
+
+Metody:
+
+* `moderujRecenzje(r: Recenzja, decyzja: bool) : void` – zatwierdza lub odrzuca recenzję klienta.
+
+* `zmienStatusZamowienia(status: StatusZamowienia) : void` – aktualizuje etap procesu realizacji zamówienia.
+
+**2. AdresDostawy**
+
+Opis: Obiekt strukturalny przechowujący pełne dane adresowe wskazane przez Klienta jako miejsce docelowe dostarczenia przesyłki.
+
+Atrybuty:
+
+* `imie : string, nazwisko : string` – dane osobowe odbiorcy.
+
+* `ulica : string`, `numerDomu : string`, `numerMieszkania : string` – szczegóły        adresowe budynku.
+
+* `kodPocztowy : string`, `miasto : string`, `kraj : string` – dane regionalne.
+
+* `telefonKontaktowy : string` – numer telefonu dla kuriera.
+
+Metody:
+
+* `walidujAdres() : bool` – sprawdza poprawność formatu kodu pocztowego, numeru telefonu oraz kompletność wymaganych pól.
+
+**3. Klient (dziedziczy po: Uzytkownik)**
+
+Opis: Zarejestrowany użytkownik systemu posiadający konto prywatne, uprawniony do składania zamówień, prowadzenia listy życzeń oraz zgłaszania zwrotów.
+
+Atrybuty:
+
+* `imie : string`, `nazwisko : string` – dane osobowe klienta.
+
+* `dataRejestracji : Date` – data utworzenia konta w systemie.
+
+Metody:
+
+* `dodajDoListyZyczen(p: Produkt) : void` – dopisuje dany produkt do listy życzeń klienta.
+
+* `zglosZwrot(z: Zamowienie) : Zwrot` – inicjuje procedurę zwrotu towaru dla dostarczonego zamówienia.
+
+**4. Koszyk**
+
+Opis: Obiekt sesyjny przechowujący tymczasową listę wariantów produktów wybranych przez Gościa lub Klienta przed przejściem do procesu zakupu.
+
+Atrybuty:
+
+* `idSesji : string` – unikalny identyfikator powiązany z przeglądarką użytkownika.
+
+* `dataUtworzenia : Date` – znacznik czasu utworzenia koszyka.
+
+Metody:
+
+* `dodajPozycje(w: WariantProduktu, ilosc: int) : void` – dodaje wariant do koszyka lub zwiększa jego ilość.
+
+* `obliczWartosc() : float` – sumuje wartość wszystkich pozycji znajdujących się w koszyku.
+
+* `wyczysc() : void` – usuwa wszystkie pozycje z koszyka po pomyślnym sfinalizowaniu zamówienia.
+
+**5. PozycjaKoszyka**
+
+Opis: Pojedynczy wpis w koszyku, łączący wybrany wariant produktu z jego oczekiwaną liczbą sztuk.
+
+Atrybuty:
+
+* `wariant : WariantProduktu` – referencja do konkretnego wariantu towaru.
+
+* `ilosc : int` – liczba zamówionych sztuk danego wariantu.
+
+Metody:
+
+* `zmienIlosc(nowaIlosc: int) : void` – aktualizuje liczbę sztuk w pozycji koszyka.
+
+* `obliczCenePozycji() : float` – zwraca iloczyn ceny bazowej wariantu (lub promocyjnej) i jego ilości.
+
+**6. PozycjaZamowienia**
+
+Opis: Utrwalona pozycja w złożonym zamówieniu, zawierająca historyczną cenę zakupu, odporną na późniejsze zmiany w katalogu produktów.
+
+Atrybuty:
+
+* `wariant : WariantProduktu` – powiązany wariant produktu.
+
+* `ilosc : int` – zakupiona liczba sztuk.
+
+* `cenaZakupu : float` – cena jednostkowa brutto zablokowana w momencie zatwierdzenia checkoutu.
+
+Metody:
+
+* `ObliczWartosc() : decimal` - klasa pełni rolę obiektu reprezentującego dane — Value Object
+
+**7. StatusZamowienia (typ wyliczeniowy)**
+
+Opis: Słownik dopuszczalnych stanów, w jakich może znajdować się zamówienie w swoim cyklu życia.
+
+* Wartości: NOWE, OPLACONE, W_REALIZACJI, WYSLANE, DOSTARCZONE, ANULOWANE, ZWROCONE.
+
+**8. Uzytkownik (klasa abstrakcyjna)**
+
+Opis: Klasa bazowa definiująca wspólne cechy i mechanizmy uwierzytelniania dla wszystkich zalogowanych osób w systemie.
+
+Atrybuty:
+
+* `idUzytkownika : int` – unikalny klucz główny użytkownika.
+
+* `email : string` – unikalny adres poczty elektronicznej, służący jako login.
+
+* `hasloHash : string` – zabezpieczony (zahaszowany) ciąg znaków hasła.
+
+Metody:
+
+* `zaloguj(haslo: string) : bool` – weryfikuje podane hasło z hashem zapisanym w bazie danych.
+
+* `zmienHaslo(noweHaslo: string) : void` – generuje nowy hash dla wprowadzonego hasła i zapisuje go w profilu.
+
+**9. Zamowienie**
+
+Opis: Klasa encyjna reprezentująca zawartą umowę kupna-sprzedaży pomiędzy klientem a sklepem, zawierająca komplet informacji transakcyjnych.
+
+Atrybuty:
+
+* `numerZamowienia : string` – unikalny identyfikator biznesowy w formacie DK-{rok}-{numer}.
+
+* `dataZlozenia : Date` – dokładny termin zatwierdzenia zakupu.
+
+* `wartoscZamowienia : float` – łączny koszt produktów wraz z wliczonym kosztem dostawy.
+
+* `status : StatusZamowienia` – bieżący etap realizacji umowy.
+
+* `metodaPlatnosci : string` – wybrany kanał płatności (np. BLIK, karta, pobranie).
+
+Metody:
+
+* `dodajPozycje(p: PozycjaZamowienia) : void` – dołącza nową pozycję towarową do zamówienia.
+
+* `ustawStatus(nowyStatus: StatusZamowienia) : void` – modyfikuje status zamówienia i wyzwala powiązane zdarzenia systemowe.
+
+* `sprawdzTerminZwrotu() : bool` – weryfikuje, czy od dnia zmiany statusu na DOSTARCZONE nie minęło więcej niż 14 dni.
+
+#### 5.2.2 Katalog,Recenzje i Zwroty
+
+**1. KategoriaProduktu**
+
+Opis: Klasa modelująca hierarchiczną strukturę asortymentu w sklepie (np. Odzież -> Koszulki).
+
+Atrybuty:
+
+* `idKategorii : int` – klucz główny kategorii.
+
+* `nazwa : string` – nazwa wyświetlana w menu (np. "Obuwie").
+
+* `idKategoriiNadrzednej : int` – wskaźnik na kategorię wyższego poziomu, umożliwiający tworzenie drzewiastej struktury.
+
+Metody:
+
+* `pobierzPodkategorie() : List<KategoriaProduktu>` – wyszukuje i zwraca listę wszystkich bezpośrednich podkategorii.
+
+**2. KategoriaSportu**
+
+Opis: Służy do kategoryzowania produktów pod kątem dyscyplin sportowych w celu ułatwienia filtrowania katalogu.
+
+Atrybuty:
+
+* `idSportu : int` – identyfikator dyscypliny.
+
+* `nazwa : string` – nazwa dyscypliny sportowej (np. "Kolarstwo", "Fitness").
+
+Metody:
+
+* brak specyficznych metod (klasa zarządzana bezpośrednio z poziomu serwisu katalogu).
+
+**3. ListaZyczen**
+
+Opis: Agregat przechowujący spis produktów zapisanych przez Klienta w celu późniejszego rozważenia zakupu.
+
+Atrybuty:
+
+* `idListy : int` – unikalny klucz listy.
+
+* `dataAktualizacji : Date` – data ostatniej modyfikacji listy.
+
+Metody:
+
+* `dodajProdukt(p: Produkt) : void` – umieszcza produkt na liście, pod warunkiem nieprzekroczenia limitu 200 pozycji.
+
+* `usunProdukt(p: Produkt) : void` – usuwa wskazany produkt z listy życzeń klienta.
+
+**4. PozycjaZwrotu**
+
+Opis: Wpis szczegółowy zgłoszenia zwrotu, określający konkretną linię z zamówienia oraz liczbę oddawanych sztuk.
+
+Atrybuty:
+
+* `pozycja : PozycjaZamowienia` – referencja do oryginalnej linii zakupowej.
+
+* `iloscZwracana : int` – deklarowana przez klienta liczba odsyłanych sztuk towaru.
+
+Metody:
+
+* `walidujIlosc() : bool` – weryfikuje, czy deklarowana ilość zwrotu jest większa od zera i nie przekracza liczby zakupionych sztuk.
+
+**5. Produkt**
+
+Opis: Główna encja katalogowa definiująca ogólne i wspólne cechy danego artykułu sportowego oferowanego w sklepie.
+
+Atrybuty:
+
+* `idProduktu : int` – klucz główny produktu.
+
+* `nazwa : string`, `marka : string` – nazwa handlowa oraz producent towaru.
+
+* `opis : string` – szczegółowy opis marketingowy i techniczny.
+
+* `cenaBazowa : float` – wyjściowa cena detaliczna przed nałożeniem promocji.
+
+* `sredniaOcena : float` – średnia arytmetyczna ocen wyliczona na podstawie zatwierdzonych opinii.
+
+Metody:
+
+* `przeliczSredniaOcene() : float` – przelicza na nowo wartość pola sredniaOcena po dodaniu lub usunięciu recenzji.
+
+**6. Promocja**
+
+Opis: Reprezentuje regułę biznesową czasowego obniżenia ceny bazowej produktów lub całych kategorii.
+
+Atrybuty:
+
+* `nazwa : string` – nazwa akcji marketingowej (np. "Wyprzedaż Zimowa").
+
+* `dataRozpoczecia : Date`, `dataZakonczenia : Date` – ramy czasowe obowiązywania rabatów.
+
+* `procentRabatu : float` – wartość zniżki wyrażona procentowo.
+
+Metody:
+
+* `czyAktywna() : bool` – zwraca wartość logiczną prawda, jeżeli bieżąca data mieści się w widelcu czasu promocji.
+
+**7. Recenzja**
+
+Opis: Pisemna opinia wystawiona produktowi przez Klienta, podlegająca weryfikacji i procesowi moderacji przez Administratora.
+
+Atrybuty:
+
+* `ocena : int` – wartość numeryczna w skali od 1 do 5.
+
+* `komentarz : string` – tekstowa treść opinii (wymagany przedział od 10 do 2000 znaków).
+
+* `dataWystawienia : Date` – data przesłania formularza oceny.
+
+* `status : StatusRecenzji` – bieżący stan widoczności opinii w systemie.
+
+Metody:
+
+* `ustawStatus(nowyStatus: StatusRecenzji) : void` – zmienia stan recenzji (np. z oczekującej na zatwierdzoną).
+
+**8. StatusRecenzji (typ wyliczeniowy)**
+
+Opis: Zbiór stanów opisujących cykl życia wystawionej opinii w procesie moderacji.
+
+* Wartości: OCZEKUJACA, ZATWIERDZONA, ODRZUCONA.
+
+**9. StatusZwrotu (typ wyliczeniowy)**
+
+Opis: Słownik pojęć określający status weryfikacji i obsługi zgłoszenia zwrotu towaru.
+
+* Wartości: OCZEKUJACY, ZAAKCEPTOWANY, ODRZUCONY, ZAKONCZONY.
+
+**10. WariantProduktu**
+
+Opis: Konkretna i fizyczna odmiana produktu (np. dany rozmiar i kolor), posiadająca własny stan magazynowy oraz unikalny kod identyfikacyjny.
+
+Atrybuty:
+
+* `SKU : string` – unikalny alfanumeryczny identyfikator magazynowy wariantu.
+
+* `rozmiar : string`, `kolor : string`, `plec : string` – cechy fizyczne wariantu.
+
+* `stanMagazynowy : int` – aktualna liczba sztuk fizycznie dostępnych w magazynie.
+
+Metody:
+
+* `zmniejszStan(ilosc: int) : void` – redukuje ilość sztuk na magazynie po zakupie.
+
+* `zwiekszStan(ilosc: int) : void` – zwiększa dostępność towaru po udanym zwrocie od klienta.
+
+* `czyDostepny(wymaganaIlosc: int) : bool` – sprawdza, czy stan magazynowy pozwala na zamówienie żądanej liczby sztuk.
+
+**11. Zwrot**
+
+Opis: Dokumentuje zgłoszenie posprzedażowe klienta wnoszące o odesłanie zakupionych produktów i odzyskanie środków finansowych.
+
+Atrybuty:
+
+* `idZwrotu : int` – unikalny numer identyfikacyjny zgłoszenia.
+
+* `dataZgloszenia : Date` – dzień wprowadzenia formularza przez klienta.
+
+* `przyczyna : string` – uzasadnienie wybrane z listy predefiniowanej.
+
+* `status : StatusZwrotu` – aktualny etap rozpatrywania wniosku.
+
+Metody:
+
+* `generujPDF() : File` – tworzy gotowy dokument formularza zwrotu w formacie PDF do wydrukowania i umieszczenia w paczce zwrotnej.
+
+### 5.3 Diagramy stanów
+
+W celu zobrazowania cyklu życia kluczowych obiektów systemu oraz zmian ich zachowania pod wpływem zdarzeń biznesowych, przygotowaliśmy diagramy stanów dla trzech klas: Zamówienie, Zwrot oraz Recenzja.
+
+#### 5.3.1 Diagram stanów dla klasy Zamówienie
+
+![Diagram stanów (1/3) — Zamówienie](diagram-stanow/5-3-1-diagram.png)
+
+**Wykaz i opis stanów:**
+
+* Stan początkowy (Start): Punkt startowy tworzenia obiektu zamówienia w systemie.
+
+* `Aktywne`: Stan zbiorczy grupujący etapy, w których zamówienie jest procesowane, a towar pozostaje zarezerwowany na magazynie.
+
+* `Nowe`: Zamówienie zostało pomyślnie utworzone przez klienta i oczekuje na autoryzację płatności.
+
+* `Opłacone`: Środki zostały zaksięgowane przez zewnętrzną bramkę płatniczą.
+
+* `W realizacji`: Zamówienie zostało przekazane do magazynu; trwa kompletowanie i pakowanie produktów.
+
+* `Wysłane`: Paczka została oklejona listem przewozowym i przekazana kurierowi.
+
+* `Anulowane`: Stan końcowy, w którym proces został przerwany, a rezerwacja magazynowa zwolniona.
+
+* `Dostarczone`: Stan końcowy oznaczający pomyślny odbiór przesyłki przez klienta.
+
+* `Zwrócone`: Stan końcowy, w który zamówienie przechodzi, jeśli klient skorzysta z ustawowego prawa do zwrotu towaru w ciągu 14 dni.
+
+* Stan końcowy (Stop): Zakończenie cyklu życia obiektu w systemie.
+
+#### 5.3.2 Diagram stanów dla klasy Zwrot
+
+![Diagram stanów (2/3) — Zwrot](diagram-stanow/5-3-2-diagram.png)
+
+**Wykaz i opis stanów:**
+
+* Stan początkowy (Start): Inicjacja procedury zwrotu.
+
+* `Oczekujący`: Zgłoszenie zostało zarejestrowane. Wpis wewnątrz stanu: entry / wygenerowanie PDF – w momencie wejścia w stan system automatycznie tworzy gotowy dokument formularza zwrotu dla klienta.
+
+* `Zaakceptowany`: Magazynier potwierdził, że odesłany towar jest kompletny i nieuszkodzony.
+
+* `Odrzucony`: Towar nie spełnił kryteriów przyjęcia (uszkodzenia, ślady użytkowania).
+
+* `Zakończony`: Środki finansowe zostały pomyślnie zwrócone klientowi.
+
+* Stan końcowy (Stop): Zamknięcie zgłoszenia w systemie. 
+
+#### 5.3.3 Diagram stanów dla klasy Recenzja
+
+![Diagram stanów (3/3) — Recenzja](diagram-stanow/5-3-3-diagram.png)
+
+**Wykaz i opis stanów:**
+
+* Stan początkowy (Start): Moment wysłania opinii przez klienta.
+
+* `Oczekująca`: Recenzja jest zapisana w bazie danych, ale pozostaje ukryta dla innych użytkowników na Karcie Produktu.
+
+* `Zatwierdzona`: Opinia spełnia regulamin i jest publicznie widoczna w sklepie.
+
+* `Odrzucona`: Treść narusza regulamin (np. zawiera spam) i została trwale zablokowana.
+
+* Stan końcowy (Stop): Zakończenie cyklu życia (np. usunięcie opinii lub archiwizacja).
