@@ -986,3 +986,39 @@ Podsumowująć sama struktura relacyjna wygeneruje w pierwszym roku ruch rzędu 
 | R2 | **Niespójność stanów magazynowych przy spiętrzeniach ruchu** (Dwóch klientów kupuje ostatnią sztukę tego samego Wariantu_Produktu podczas wyprzedaży) | Średnie | Średni | Zastosowanie transakcji bazodanowych z odpowiednim poziomem izolacji. Wdrożenie w Koszyku mechanizmu tymczasowej rezerwacji Stanu_Magazynowego na czas Checkoutu (np. na 60 minut). | Ręczne anulowanie jednego z zamówień przez Administratora. Wysłanie e-maila z przeprosinami i rekompensatą w postaci wygenerowanego Kuponu_Rabatowego na kolejne zakupy. |
 | R3 | **Znaczne opóźnienia w integracji warstwy Front-end z Back-endem** (Wynikające z równoległej pracy różnych członków zespołu) | Duże | Duży | Wczesne zdefiniowanie i "zamrożenie" kontraktów API. Regularne spotkania synchronizacyjne zespołu programistycznego. | Zmniejszenie zakresu projektu przed oddaniem. Odłożenie modułów opcjonalnych na rzecz dopracowania krytycznej ścieżki zakupowej (Katalog $\rightarrow$ Koszyk $\rightarrow$ Zamówienie). |
 | R4 | **Spadek wydajności aplikacji przy docelowym ruchu** (Czas wczytania strony LCP przekracza założone 2,5 s) | Średnie | Mały | Zastosowanie paginacji dla wyników wyszukiwania Produktów. Optymalizacja rozmiaru ładowanych zdjęć w warstwie UI. Konfiguracja indeksów na tabelach bazodanowych. | Wdrożenie prostego mechanizmu cache'owania pamięci podręcznej dla najczęściej odwiedzanych Kategorii_Sportu lub szybkie dokupienie RAM/CPU na okres szczytu. |
+
+## 10. Kosztorys realizacji przedsięwzięcia
+
+ **1. Zestawienie kosztów w rozbiciu na etapy i moduły**
+
+ | # | Element wyceny | Zakres prac | Szacowany koszt netto (PLN) | 
+|---|-----------|-------------------|------|
+| 1 | **Projekt i Architektura** | Analiza wymagań, przygotowanie makiet UI/UX, projekt relacyjnej bazy danych, konfiguracja środowisk (CI/CD). | 6 000 PLN | 
+| 2 | **Back-end: Silnik Sklepu** | Logika biznesowa, API, autoryzacja, zarządzanie Katalogiem, Koszykiem, Zamówieniami i procesem Zwrotów. | 18 000 PLN | 
+| 3 | **Front-end: Sklep Klienta** | Wdrożenie responsywnego interfejsu dla Gości i Klientów, integracja z API, wyszukiwarka, Checkout. | 14 000 PLN | 
+| 4 | *Front-end: Panel Administratora** | Panel do zarządzania systemem, zamówieniami, produktami oraz moderacji recenzji. | 9 000 PLN |
+| 5 | **Integracje zewnętrzne** | Podpięcie produkcyjne Bramki Płatniczej oraz Systemu Pocztowego. | 4 000 PLN |
+| 6 | **Infrastruktura i Wdrożenie** | Konfiguracja serwera docelowego, wykupienie domeny i certyfikatu SSL, instalacja systemu. | 3 000 PLN |
+| 7 | **Szkolenia i Konsultacje** | Przeprowadzenie 2-dniowego szkolenia dla przyszłych Administratorów sklepu (pracowników), dostarczenie instrukcji obsługi. | 2 500 PLN | 
+
+**łączny koszt projektu: 56 500 PLN**
+
+**2. Warunki płatności i sposób odbioru**
+
+**a)Sposób odbioru systemu:**
+
+* Odbiór realizowany jest etapowo. Po zakończeniu prac programistycznych następuje faza UAT (User Acceptance Testing) trwająca 14 dni kalendarzowych, podczas której Zamawiający testuje system na środowisku testowym.
+
+* Zgłoszone usterki są usuwane w ramach budżetu projektowego.
+
+* Po pozytywnym zakończeniu testów następuje wdrożenie na serwer produkcyjny i podpisanie Protokołu zdawczo-odbiorczego przez obie strony.
+
+**b)Warunki płatności**
+
+Płatność za projekt podzielona jest na trzy części, płatne na podstawie faktur VAT z 14-dniowym terminem płatności:
+
+* I część (Zaliczka): 30% kwoty całkowitej (16 950 PLN) – płatna po podpisaniu umowy i zatwierdzeniu specyfikacji/projektu architektonicznego.
+
+* II część (Po testach wewnętrznych): 40% kwoty całkowitej (22 600 PLN) – płatna po udostępnieniu działającej wersji systemu na środowisku testowym do testów UAT.
+
+* III część (Końcowa): 30% kwoty całkowitej (16 950 PLN) – płatna po podpisaniu końcowego protokołu zdawczo-odbiorczego i przekazaniu kodów źródłowych oraz dostępu do serwera produkcyjnego.
