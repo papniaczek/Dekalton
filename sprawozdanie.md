@@ -957,3 +957,32 @@ Podsumowująć sama struktura relacyjna wygeneruje w pierwszym roku ruch rzędu 
 * **Typ stanowiska**: Standardowe komputery biurowe (PC/Laptop) podłączone do stabilnej sieci internetowej, wyposażone w monitory. Nie są wymagane maszyny o wysokiej mocy obliczeniowej.
 
 * **Dodatkowe urządzenia**: Zwykła drukarka biurowa / drukarka etykiet kurierskich do procesowania zamówień ze statusem "W realizacji".
+
+## 7.Propozycja technologii informatycznych, które mogą zostać wykorzystane do realizacji systemu
+
+### 7.1 diagram wdrożenia
+
+![diagram wdrożenia](diagram-wdroz/7-1-diagram.png)
+
+## 8.Propozycja planu pracy
+
+| ID | Nazwa etapu (realizowany komponent) | Czas trwania (dni robocze) | Zależności (wymaga zakończenia) | Przypisane zasoby ludzkie |
+|---|-----------|-------------------|------|------|
+| E1 | **Projekt techniczny i architektura bazodanowa** (Model ERD, diagramy klas, makiety UI) | 5 dni | Brak (etap początkowy) | Kacper S., Kacper H., Szymon N. |
+| E2 | **Konfiguracja środowiska i repozytorium** (Setup bazy danych, szkielet projektowy, CI/CD) | 3 dni | E1 | Kacper S. |
+| E3 | **Back-end: Moduł Katalogu i Użytkowników** (Zarządzanie produktami, wariantami, autoryzacja, konta) | 10 dni | E2 | Kacper H. |
+| E4 | **Front-end: Interfejs Klienta (Sklep)** (Widoki katalogu, karta produktu, wyszukiwarka) | 12 dni | E1 (może być robione równolegle z E2 i E3) | Szymon N.|
+| E5 | **Back-end: Logika Koszyka, Zamówień i Zwrotów** (Serwisy biznesowe, walidacja stanów magazynowych) | 12 dni | E3 | Kacper H. |
+| E6 | **Integracje Zewnętrzne** (Podpięcie Bramki Płatniczej i Systemu Pocztowego API) | 7 dni | E5 | Kacper S. |
+| E7 | **Front-end: Panel Administratora** (Zarządzanie zamówieniami, moderacja recenzji, zwroty) | 10 dni | E3 | Szymon N. |
+| E8 | **Testy systemowe i poprawki (QA)** (Testy integracyjne E2E, walidacja ścieżki zakupowej checkoutu) | 8 dni | E4, E6, E7 | Kacper S., Kacper H., Szymon N. |
+| E9 | **Wdrożenie i dokumentacja** (Publikacja na serwerze produkcyjnym, instrukcja obsługi) | 4 dni | E8 | Kacper S., Kacper H., Szymon N. |
+
+## 9.Analiza ryzyka projektu zawierająca wykaz przewidywanych zagrożeń
+
+| ID | Zidentyfikowane zagrożenie | Prawdopodobieństwo | Stopień szkodliwości | Propozycje metod zapobiegania | Plan awaryjny w przypadku wystąpienia
+|---|-----------|--------------|------|------|--------------------------|
+| R1 | **Niedostępność API zewnętrznej Bramki_Płatniczej podczas Checkoutu** (np. awaria po stronie operatora płatności) | Średnie | Duży | Izolacja logiki płatności za pomocą wzorca projektowego. Wdrożenie mechanizmu timeout na zapytania sieciowe, aby nie blokować aplikacji. | System automatycznie ukrywa niedostępną metodę płatności i wyświetla komunikat. Klient może sfinalizować transakcję wybierając "płatność przy odbiorze", co pozwala utrzymać sprzedaż. |
+| R2 | **Niespójność stanów magazynowych przy spiętrzeniach ruchu** (Dwóch klientów kupuje ostatnią sztukę tego samego Wariantu_Produktu podczas wyprzedaży) | Średnie | Średni | Zastosowanie transakcji bazodanowych z odpowiednim poziomem izolacji. Wdrożenie w Koszyku mechanizmu tymczasowej rezerwacji Stanu_Magazynowego na czas Checkoutu (np. na 60 minut). | Ręczne anulowanie jednego z zamówień przez Administratora. Wysłanie e-maila z przeprosinami i rekompensatą w postaci wygenerowanego Kuponu_Rabatowego na kolejne zakupy. |
+| R3 | **Znaczne opóźnienia w integracji warstwy Front-end z Back-endem** (Wynikające z równoległej pracy różnych członków zespołu) | Duże | Duży | Wczesne zdefiniowanie i "zamrożenie" kontraktów API. Regularne spotkania synchronizacyjne zespołu programistycznego. | Zmniejszenie zakresu projektu przed oddaniem. Odłożenie modułów opcjonalnych na rzecz dopracowania krytycznej ścieżki zakupowej (Katalog $\rightarrow$ Koszyk $\rightarrow$ Zamówienie). |
+| R4 | **Spadek wydajności aplikacji przy docelowym ruchu** (Czas wczytania strony LCP przekracza założone 2,5 s) | Średnie | Mały | Zastosowanie paginacji dla wyników wyszukiwania Produktów. Optymalizacja rozmiaru ładowanych zdjęć w warstwie UI. Konfiguracja indeksów na tabelach bazodanowych. | Wdrożenie prostego mechanizmu cache'owania pamięci podręcznej dla najczęściej odwiedzanych Kategorii_Sportu lub szybkie dokupienie RAM/CPU na okres szczytu. |
