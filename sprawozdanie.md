@@ -907,3 +907,53 @@ W celu zobrazowania cyklu życia kluczowych obiektów systemu oraz zmian ich zac
 ![Interfejs użytkownika z rodzieleniem na poszczególne etapy 1/2](interfejs-graficzny/graficzny-interfejs-1.png)
 ![Interfejs użytkownika z rodzieleniem na poszczególne etapy 2/2](interfejs-graficzny/graficzny-interfejs-2.png)
 
+## 6. Wymagania niefunkcjonalne dla systemu
+
+### 6.1 Oszacowanie wielkości bazy danych
+
+Oszacowanie wielkości relacyjnej bazy danych (SQL) przeprowadziliśmy na podstawie przewidywanej skali eksploatacji w pierwszym roku działalności tj.: około 10 000 zarejestrowanych klientów, średnio około 300 zamówień na dobę, co daje około 110 000 zamówień rocznie.
+
+Zakładamy, że system będzie przechowywał pliki binarne takie jak zdjęcia produktów czy wygenerowane formularze PDF ze zwrotami w zewnętrznym magazynie obiektowym, a relacyjna baza danych będzie przechowywać jedynie ścieżki URL do tych plików.
+
+**Szacunkowy przyrost danych strukturalnych (tekstowych i liczbowych) w pierwszym roku:**
+
+* **Klienci i Adresy**: 10 000 klientów $\times$ 2 KB = ~20 MB
+
+* **Katalog** (Produkty, Warianty, Kategorie): ~5 000 produktów $\times$ 4 warianty $\times$ 3 KB = ~60 MB
+
+* **Zamówienia i Pozycje Zamówień**: 110 000 zamówień $\times$ 5 KB (wraz z pozycjami) = ~550 MB
+
+* **Recenzje**: ~20 000 opinii rocznie (na podstawie założenia 30–80 recenzji na dobę) $\times$ 2 KB = ~40 MB
+
+* **Zwroty**: ~11 000 zgłoszeń (przy założeniu wskaźnika zwrotów na poziomie 10%) $\times$ 2 KB = ~22 MB
+
+* **Narzut na indeksy, klucze obce i logi transakcyjne**: + 50%
+
+Podsumowująć sama struktura relacyjna wygeneruje w pierwszym roku ruch rzędu 1–1,5 GB. Biorąc pod uwagę perspektywę 5-letnią oraz konieczność przechowywania danych historycznych, minimalna pojemność serwera relacyjnej bazy danych (bez plików graficznych) na start powinna wynosić 10 GB. Przestrzeń dyskowa na zewnętrzne zasoby binarne (zdjęcia, formularze PDF) powinna wynosić minimum 50 GB.
+
+### 6.2 Propozycja wymaganych czasów odpowiedzi
+
+| # | Rodzaj operacji | Maksymalny czas odpowiedzi | Opis |
+|---|-----------|-------------------|------|
+| 1 | `Renderowanie Katalogu` | ≤ 2,5 s | Dotyczy metryki Largest Contentful Paint . Wymaga wdrożenia mechanizmów cache'owania. |
+| 2 | `Zwracanie wyników wyszukiwania i filtrowania`| ≤ 500 ms | Operacje odczytu (GET) na zapleczu (API) obsługujące dynamiczne zapytania Klientów. |
+| 3 | `Operacje na Koszyku` | ≤ 300 ms | Dodawanie, usuwanie i zmiana ilości Wariantów_Produktu; wymaga natychmiastowej reakcji interfejsu. |
+| 4 | `Inicjacja Checkoutu i utworzenie Zamówienia` | ≤ 2,0 s | Rezerwacja Stanu_Magazynowego, zapis obiektu Zamówienia do bazy i przygotowanie integracji z Bramką_Płatniczą. |
+| 5 | `Generowanie formularza PDF (Zwroty)` | ≤ 30 s | Złożona operacja I/O realizowana po stronie serwera po zgłoszeniu Zwrotu przez Klienta. |
+| 6 | `Raportowanie (Panel Administratora)` | ≤ 5,0 s | Ciężkie zapytania analityczne operujące na tysiącach rekordów Zamówień, realizowane wyłącznie dla Administratorów. |
+
+### 6.3 Oszacowanie liczby i typów potrzebnych stanowisk pracy użytkowników systemu
+
+**1. Stanowiska dla Klientów i Gości (Użytkownicy zewnętrzni)**
+
+* **Liczba stanowisk**: Zmienna i nieograniczona, szacowana na ok. 10 000 aktywnych użytkowników rocznie.
+
+* **Typ stanowiska**: Prywatne urządzenia użytkowników z dostępem do internetu – w równej mierze komputery osobiste (PC/Mac) oraz urządzenia mobilne (smartfony, tablety). System musi być w pełni responsywny.
+
+**2. Stanowiska dla Administratorów (Użytkownicy wewnętrzni)**
+
+* **Liczba stanowisk**: 2 do 5 stanowisk, obsługiwanych rotacyjnie w ramach czasu pracy zespołu obsługi sklepu.
+
+* **Typ stanowiska**: Standardowe komputery biurowe (PC/Laptop) podłączone do stabilnej sieci internetowej, wyposażone w monitory. Nie są wymagane maszyny o wysokiej mocy obliczeniowej.
+
+* **Dodatkowe urządzenia**: Zwykła drukarka biurowa / drukarka etykiet kurierskich do procesowania zamówień ze statusem "W realizacji".
